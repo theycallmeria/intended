@@ -3,17 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZukiScator - Advanced Lua Obfuscator</title>
+  <title>YasuScator - Advanced Lua Obfuscator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
   <link href="https://fonts.cdnfonts.com/css/minecraft-3" rel="stylesheet">
 
   <style>
-    body { font-family: 'Minecraft', system-ui, sans-serif; }
-    h1, h2, h3, button, input, select, label { font-family: 'Minecraft', system-ui, sans-serif; }
-    .glow { box-shadow: 0 0 25px rgba(249, 115, 22, 0.4); }
-    .card:hover { transform: translateY(-8px); }
-    button { letter-spacing: 4px; text-shadow: 2px 2px 0 #000; }
+    body {
+      font-family: 'Minecraft', system-ui, sans-serif;
+    }
+    
+    h1, h2, h3, button, input, select, label {
+      font-family: 'Minecraft', system-ui, sans-serif;
+    }
+
+    .glow {
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.4);
+    }
+    
+    .card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    }
+
+    h1, h2 {
+      text-shadow: 3px 3px 0 #000,
+                   -1px -1px 0 #000,
+                   1px -1px 0 #000,
+                   -1px 1px 0 #000,
+                   1px 1px 0 #000;
+    }
+
+    button {
+      letter-spacing: 4px;
+      text-shadow: 2px 2px 0 #000;
+    }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
@@ -21,7 +49,12 @@
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center text-2xl font-bold">Y</div>
-        <h1 class="text-2xl font-bold tracking-tight">Zuki<span class="text-orange-500">Scator</span></h1>
+        <h1 class="text-2xl font-bold tracking-tight">Yasu<span class="text-orange-500">Scator</span></h1>
+      </div>
+      <div class="flex items-center gap-8 text-sm">
+        <a href="#" class="hover:text-orange-500 transition-colors">Obfuscator</a>
+        <a href="#" class="hover:text-orange-500 transition-colors">Docs</a>
+        <a href="#" class="hover:text-orange-500 transition-colors">About</a>
       </div>
     </div>
   </nav>
@@ -29,7 +62,7 @@
   <div class="max-w-4xl mx-auto pt-24 pb-16 px-6">
     <div class="text-center mb-10">
       <h2 class="text-5xl font-bold mb-3">Advanced Lua Obfuscator</h2>
-      <p class="text-zinc-400 text-lg">VM + String Encryption • Very Hard to Deobf</p>
+      <p class="text-zinc-400 text-lg">Military-grade protection for your Lua scripts</p>
     </div>
 
     <div class="card bg-zinc-900/70 border border-zinc-700 rounded-3xl p-8 glow">
@@ -49,7 +82,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-zinc-400 mb-2">Encryption Key <span class="text-red-500">(Required)</span></label>
+          <label class="block text-sm font-medium text-zinc-400 mb-2">Encryption Key</label>
           <div class="relative">
             <input type="text" id="key" maxlength="64" required
                    class="w-full bg-zinc-800 border border-zinc-700 focus:border-orange-500 rounded-2xl px-6 py-4 text-lg outline-none transition-all"
@@ -64,14 +97,14 @@
           <div>
             <label class="block text-sm font-medium text-zinc-400 mb-2">Obfuscation Level</label>
             <select id="level" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4">
-              <option value="1">Basic</option>
-              <option value="2" selected>Advanced</option>
-              <option value="3">Extreme (VM)</option>
+              <option value="1">Basic (Fast)</option>
+              <option value="2" selected>Advanced (Recommended)</option>
+              <option value="3">Extreme (Slowest)</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-zinc-400 mb-2">Extra Protection</label>
-            <div class="space-y-2">
+            <div class="flex gap-4">
               <label class="flex items-center gap-2">
                 <input type="checkbox" id="anti-debug" checked class="w-5 h-5 accent-orange-500" />
                 <span class="text-sm">Anti-Debug</span>
@@ -79,14 +112,6 @@
               <label class="flex items-center gap-2">
                 <input type="checkbox" id="junk-code" checked class="w-5 h-5 accent-orange-500" />
                 <span class="text-sm">Junk Code</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input type="checkbox" id="string-enc" checked class="w-5 h-5 accent-orange-500" />
-                <span class="text-sm">String Encryption</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input type="checkbox" id="vm" checked class="w-5 h-5 accent-orange-500" />
-                <span class="text-sm">VM Protection (Strongest)</span>
               </label>
             </div>
           </div>
@@ -105,12 +130,15 @@
     let currentFile = null;
 
     const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
-    const generateRandomString = (length) => Array.from({length}, () => abc[Math.floor(Math.random() * abc.length)]).join('');
+    const generateRandomString = (length) => {
+      return Array.from({length}, () => abc[Math.floor(Math.random() * abc.length)]).join('');
+    };
 
     const xorEncrypt = (str, key) => {
       const result = [];
       for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        const charCode = str.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        result.push(charCode);
       }
       return result;
     };
@@ -121,64 +149,86 @@
     const keyInput = document.getElementById('key');
     const keyLength = document.getElementById('key-length');
 
-    keyInput.addEventListener('input', () => keyLength.textContent = keyInput.value.length);
+    keyInput.addEventListener('input', () => {
+      keyLength.textContent = keyInput.value.length;
+    });
 
-    ['dragover', 'dragenter'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.style.borderColor = '#f97316'; }));
-    ['dragleave', 'dragend'].forEach(evt => dropZone.addEventListener(evt, () => dropZone.style.borderColor = ''));
-    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor = ''; if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+    // Drag & Drop
+    ['dragover', 'dragenter'].forEach(evt => {
+      dropZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#f97316';
+      });
+    });
+
+    ['dragleave', 'dragend'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.style.borderColor = '');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '';
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
 
     function handleFile(file) {
-      if (!file.name.match(/\.(lua|txt)$/i)) return alert("Only .lua or .txt files allowed!");
+      if (!file.name.match(/\.(lua|txt)$/i)) {
+        alert("Please upload only .lua or .txt files!");
+        return;
+      }
       currentFile = file;
       fileInfo.innerHTML = `<span class="text-green-400">✓ \( {file.name}</span> <span class="text-zinc-500">( \){(file.size/1024).toFixed(1)} KB)</span>`;
     }
 
-    document.getElementById('form').addEventListener('submit', e => {
+    document.getElementById('form').addEventListener('submit', (e) => {
       e.preventDefault();
-
+      
       const key = keyInput.value.trim();
-      if (!key) return alert("Encryption Key is required!");
+      if (!key) return alert("Please enter an encryption key!");
       if (!currentFile) return alert("Please upload a script first!");
 
       const reader = new FileReader();
       reader.onload = () => {
-        const script = reader.result.trim();
+        const script = reader.result;
         const encrypted = xorEncrypt(script, key);
 
-        let output = `--[[ ZukiScator v0.0.5 - VM Protection ]]--\n`;
+        let output = `--[[ YasuScator v2.0 - Advanced Lua Protection ]]--\n`;
         output += `--[[ https://zukisworld.vercel.app/# ]]--\n\n`;
         output += `local k = "${key}";\n`;
         output += `local d = {${encrypted.join(',')}};\n\n`;
 
+        // Anti-debug
         if (document.getElementById('anti-debug').checked) {
-          output += `if _G.debug or _G.hookfunction or debug.getinfo then print("zuki is mad u deobf dis masterpiece") return end\n\n`;
+          output += `if _G["debug"] or _G["hookfunction"] or debug.getinfo or _G.getgenv then\n`;
+          output += `    print("zuki is mad u deobf dis masterpiece")\n`;
+          output += `    return\n`;
+          output += `end\n\n`;
         }
 
-        // VM Decrypt + Execute
-        output += `local function vm_decrypt()\n`;
+        // Decrypt function
+        output += `local function decrypt()\n`;
         output += `  local s = ""\n`;
-        output += `  for i=1,#d do s = s .. string.char(d[i] \~ k:byte((i-1)%#k+1)) end\n`;
+        output += `  for i = 1, #d do\n`;
+        output += `    local c = d[i] \~ k:byte((i-1) % #k + 1)\n`;
+        output += `    s = s .. string.char(c)\n`;
+        output += `  end\n`;
         output += `  return s\n`;
         output += `end\n\n`;
 
-        if (document.getElementById('string-enc').checked) {
-          output += `local function dec(str)\n  local r="" for i=1,#str do r=r..string.char(str:byte(i)\~k:byte((i-1)%#k+1)) end return r end\n\n`;
-        }
-
+        // Junk Code
         if (document.getElementById('junk-code').checked) {
-          output += `local _=math.random(1,999999); local ___="${generateRandomString(90)}";\n\n`;
+          output += `local _ = math.random(1,999999);\n`;
+          output += `local __ = string.char;\n`;
+          output += `local ___ = "${generateRandomString(60)}";\n\n`;
         }
 
-        if (document.getElementById('vm').checked) {
-          output += `-- VM Protection\n`;
-          output += `local function run_vm(code) loadstring(code)() end\n`;
-          output += `run_vm(vm_decrypt())\n`;
-        } else {
-          output += `loadstring(vm_decrypt())()\n`;
-        }
-
-        output += `-- Protected by ZukiScator`;
+        output += `loadstring(decrypt())()\n`;
+        output += `-- Protected by YasuScator`;
 
         const blob = new Blob([output], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -188,7 +238,9 @@
         a.click();
         URL.revokeObjectURL(url);
 
+        alert("✅ Script successfully obfuscated and downloaded!");
       };
+
       reader.readAsText(currentFile);
     });
   </script>
