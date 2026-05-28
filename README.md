@@ -1,6 +1,6 @@
 Zuki Obfuscator
 
-Website: "zukisworld.vercel.app" (https://zukisworld.vercel.app)
+Website: [Zuki Obfuscator Link](https://zukisworld.vercel.com)
 
 Features
 
