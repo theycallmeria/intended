@@ -82,11 +82,11 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-zinc-400 mb-2">Encryption Key <span class="text-zinc-500">(Optional)</span></label>
+          <label class="block text-sm font-medium text-zinc-400 mb-2">Encryption Key <span class="text-red-500">(Required)</span></label>
           <div class="relative">
             <input type="text" id="key" maxlength="64"
                    class="w-full bg-zinc-800 border border-zinc-700 focus:border-orange-500 rounded-2xl px-6 py-4 text-lg outline-none transition-all"
-                   placeholder="Enter encryption key (optional)..." />
+                   placeholder="Enter strong encryption key..." required />
             <div class="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
               <span id="key-length">0</span>/64
             </div>
@@ -181,24 +181,19 @@
     document.getElementById('form').addEventListener('submit', e => {
       e.preventDefault();
 
-      if (!currentFile) return alert("Please upload a script first!");
-
       const key = keyInput.value.trim();
-      const useEncryption = key.length > 0;
+      if (!key) return alert("Encryption Key is required!");
+      if (!currentFile) return alert("Please upload a script first!");
 
       const reader = new FileReader();
       reader.onload = () => {
-        let script = reader.result.trim();
+        const script = reader.result.trim();
+        const encrypted = xorEncrypt(script, key);
+
         let output = `--[[ ZukiScator v0.0.3 ]]--\n`;
         output += `--[[ https://zukisworld.vercel.app/# ]]--\n\n`;
-
-        if (useEncryption) {
-          const encrypted = xorEncrypt(script, key);
-          output += `local k = "${key}";\n`;
-          output += `local d = {${encrypted.join(',')}};\n\n`;
-        } else {
-          output += `-- No encryption key - Basic Obfuscation Mode\n\n`;
-        }
+        output += `local k = "${key}";\n`;
+        output += `local d = {${encrypted.join(',')}};\n\n`;
 
         // Anti-Tampering
         if (document.getElementById('anti-debug').checked) {
@@ -208,26 +203,24 @@
           output += `end\n\n`;
         }
 
-        // Decrypt function only if encrypted
-        if (useEncryption) {
-          output += `local function decrypt()\n  local s = ""\n  for i = 1, #d do\n    local c = d[i] \~ k:byte((i-1) % #k + 1)\n    s = s .. string.char(c)\n  end\n  return s\nend\n\n`;
-        }
+        // Decrypt Function
+        output += `local function decrypt()\n`;
+        output += `  local s = ""\n`;
+        output += `  for i = 1, #d do\n`;
+        output += `    local c = d[i] \~ k:byte((i-1) % #k + 1)\n`;
+        output += `    s = s .. string.char(c)\n`;
+        output += `  end\n`;
+        output += `  return s\n`;
+        output += `end\n\n`;
 
-        // Junk Code (works with or without key)
+        // Junk Code
         if (document.getElementById('junk-code').checked) {
           output += `local _ = math.random(1,999999);\n`;
           output += `local __ = string.char;\n`;
           output += `local ___ = "${generateRandomString(50)}";\n\n`;
         }
 
-        // Final Execution
-        if (useEncryption) {
-          output += `loadstring(decrypt())()\n`;
-        } else {
-          // Basic obfuscation without encryption
-          output += `loadstring([[\n${script}\n]])()\n`;
-        }
-
+        output += `loadstring(decrypt())()\n`;
         output += `\n-- Protected by ZukiScator\n`;
         output += `-- https://zukisworld.vercel.app/#`;
 
@@ -239,7 +232,6 @@
         a.click();
         URL.revokeObjectURL(url);
 
-        alert("✅ Obfuscation Complete!\n\nMade with ZukiScator → https://zukisworld.vercel.app/#");
       };
 
       reader.readAsText(currentFile);
