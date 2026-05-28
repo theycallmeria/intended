@@ -42,14 +42,6 @@
       letter-spacing: 4px;
       text-shadow: 2px 2px 0 #000;
     }
-
-    /* Fix for mobile */
-    @media (max-width: 640px) {
-      h2 {
-        font-size: 2.5rem;
-        line-height: 1.1;
-      }
-    }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
@@ -145,7 +137,6 @@
     const generateRandomString = (length) => Array.from({length}, () => abc[Math.floor(Math.random() * abc.length)]).join('');
 
     const xorEncrypt = (str, key) => {
-      if (!key) return str.split('').map(c => c.charCodeAt(0));
       const result = [];
       for (let i = 0; i < str.length; i++) {
         result.push(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
@@ -197,7 +188,7 @@
 
       const reader = new FileReader();
       reader.onload = () => {
-        const script = reader.result;
+        const script = reader.result.trim();
         let output = `--[[ ZukiScator v0.0.3 ]]--\n`;
         output += `--[[ https://zukisworld.vercel.app/# ]]--\n\n`;
 
@@ -205,32 +196,44 @@
           const encrypted = xorEncrypt(script, key);
           output += `local k = "${key}";\n`;
           output += `local d = {${encrypted.join(',')}};\n\n`;
-        } else {
-          output += `-- No encryption key used\n\n`;
         }
 
+        // Anti-Tampering
         if (document.getElementById('anti-debug').checked) {
           output += `if _G.debug or _G.hookfunction or _G.getfenv or _G.getgenv or _G.getrenv or _G.loadstring or debug.getinfo then\n`;
           output += `    print("zuki is mad u deobf dis masterpiece")\n`;
-          output += `    return \n`;
+          output += `    return\n`;
           output += `end\n\n`;
         }
 
+        // Decrypt function (only if encrypted)
         if (useEncryption) {
-          output += `local function decrypt()\n  local s = ""\n  for i = 1, #d do\n    local c = d[i] \~ k:byte((i-1) % #k + 1)\n    s = s .. string.char(c)\n  end\n  return s\nend\n\n`;
+          output += `local function decrypt()\n`;
+          output += `  local s = ""\n`;
+          output += `  for i = 1, #d do\n`;
+          output += `    local c = d[i] \~ k:byte((i-1) % #k + 1)\n`;
+          output += `    s = s .. string.char(c)\n`;
+          output += `  end\n`;
+          output += `  return s\n`;
+          output += `end\n\n`;
         }
 
+        // Junk Code
         if (document.getElementById('junk-code').checked) {
-          output += `local _ = math.random(1,999999);\nlocal __ = string.char;\nlocal ___ = "${generateRandomString(45)}";\n\n`;
+          output += `local _ = math.random(1,999999);\n`;
+          output += `local __ = string.char;\n`;
+          output += `local ___ = "${generateRandomString(45)}";\n\n`;
         }
 
+        // Execute
         if (useEncryption) {
           output += `loadstring(decrypt())()\n`;
         } else {
+          output += `-- No encryption key used\n`;
           output += `loadstring([[\n${script}\n]])()\n`;
         }
 
-        output += `-- Protected by ZukiScator\n`;
+        output += `\n-- Protected by ZukiScator\n`;
         output += `-- https://zukisworld.vercel.app/#`;
 
         const blob = new Blob([output], { type: 'text/plain' });
@@ -248,4 +251,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
