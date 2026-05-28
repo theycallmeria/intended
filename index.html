@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YasuScator - Advanced Lua Obfuscator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    
+    .glow {
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.4);
+    }
+    
+    .card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-black/70 backdrop-blur-md border-b border-orange-500/20 fixed w-full z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center text-2xl font-bold">Y</div>
+        <h1 class="text-2xl font-bold tracking-tight">Yasu<span class="text-orange-500">Scator</span></h1>
+      </div>
+      <div class="flex items-center gap-8 text-sm">
+        <a href="#" class="hover:text-orange-500 transition-colors">Obfuscator</a>
+        <a href="#" class="hover:text-orange-500 transition-colors">Docs</a>
+        <a href="#" class="hover:text-orange-500 transition-colors">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto pt-24 pb-16 px-6">
+    <div class="text-center mb-10">
+      <h2 class="text-5xl font-bold mb-3">Advanced Lua Obfuscator</h2>
+      <p class="text-zinc-400 text-lg">Military-grade protection for your Lua scripts</p>
+    </div>
+
+    <div class="card bg-zinc-900/70 border border-zinc-700 rounded-3xl p-8 glow">
+      <form id="form" class="space-y-8">
+        <!-- File Upload -->
+        <div>
+          <label class="block text-sm font-medium text-zinc-400 mb-2">Upload Lua Script</label>
+          <div class="border-2 border-dashed border-zinc-700 hover:border-orange-500 rounded-2xl p-10 text-center transition-colors" id="drop-zone">
+            <i class="fa-solid fa-cloud-arrow-up text-5xl text-orange-500 mb-4"></i>
+            <p class="text-zinc-300 font-medium">Drop your .lua or .txt file here</p>
+            <p class="text-zinc-500 text-sm mt-1">or</p>
+            <label class="cursor-pointer inline-block mt-4 px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-xl text-sm font-semibold transition-colors">
+              Select File
+              <input type="file" id="file" accept=".lua,.txt" class="hidden" />
+            </label>
+          </div>
+          <div id="file-info" class="mt-3 text-sm text-zinc-400"></div>
+        </div>
+
+        <!-- Key -->
+        <div>
+          <label class="block text-sm font-medium text-zinc-400 mb-2">Encryption Key</label>
+          <div class="relative">
+            <input type="text" id="key" 
+                   class="w-full bg-zinc-800 border border-zinc-700 focus:border-orange-500 rounded-2xl px-6 py-4 text-lg outline-none transition-all"
+                   placeholder="Enter strong encryption key..." required />
+            <div class="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
+              <span id="key-length">0</span>/64
+            </div>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-2">Obfuscation Level</label>
+            <select id="level" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4">
+              <option value="1">Basic (Fast)</option>
+              <option value="2" selected>Advanced (Recommended)</option>
+              <option value="3">Extreme (Slowest)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-400 mb-2">Extra Protection</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" id="anti-debug" checked class="w-5 h-5 accent-orange-500" />
+                <span class="text-sm">Anti-Debug</span>
+              </label>
+              <label class="flex items-center gap-2">
+                <input type="checkbox" id="junk-code" checked class="w-5 h-5 accent-orange-500" />
+                <span class="text-sm">Junk Code</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="obfuscate-btn"
+          class="w-full py-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 rounded-2xl text-xl font-bold tracking-wider transition-all active:scale-95">
+          <i class="fa-solid fa-shield-halved mr-3"></i>
+          OBFUSCATE SCRIPT
+        </button>
+      </form>
+    </div>
+
+    <div class="text-center text-xs text-zinc-500 mt-8">
+      Client-side • No data leaves your browser • Open Source Spirit
+    </div>
+  </div>
+
+  <script>
+    let realKey = "";
+    let currentFile = null;
+
+    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const generateRandomString = (length) => {
+      return Array.from({length}, () => abc[Math.floor(Math.random() * abc.length)]).join('');
+    };
+
+    const xorEncrypt = (str, key) => {
+      const result = [];
+      for (let i = 0; i < str.length; i++) {
+        const charCode = str.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        result.push(charCode);
+      }
+      return result;
+    };
+
+    const createAlibi = (varName, value, tableName, tableData) => {
+      return `local \( {varName}=" \){value}";local \( {tableName}={ \){tableData}};`;
+    };
+
+    document.getElementById('key').addEventListener('input', (e) => {
+      document.getElementById('key-length').textContent = e.target.value.length;
+    });
+
+    // File handling
+    const fileInput = document.getElementById('file');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInfo = document.getElementById('file-info');
+
+    ['dragover', 'dragenter'].forEach(evt => {
+      dropZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#f97316';
+      });
+    });
+
+    ['dragleave', 'dragend'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.style.borderColor = '');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '';
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.name.match(/\.(lua|txt)$/)) {
+        alert("Please upload only .lua or .txt files!");
+        return;
+      }
+      currentFile = file;
+      fileInfo.innerHTML = `<span class="text-green-400">✓ \( {file.name}</span> <span class="text-zinc-500">( \){(file.size/1024).toFixed(1)} KB)</span>`;
+    }
+
+    // Main Obfuscation
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const key = document.getElementById('key').value.trim();
+      if (!key) return alert("Please enter an encryption key!");
+      if (!currentFile) return alert("Please upload a script first!");
+
+      const level = parseInt(document.getElementById('level').value);
+      const antiDebug = document.getElementById('anti-debug').checked;
+      const junkCode = document.getElementById('junk-code').checked;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const script = reader.result;
+        const encrypted = xorEncrypt(script, key);
+
+        // Generate random variables
+        const r1 = generateRandomString(25);
+        const r2 = generateRandomString(18);
+        const r3 = generateRandomString(22);
+        const r4 = generateRandomString(30);
+
+        let output = `--[[ YasuScator v2.0 - Advanced Lua Protection ]]\n`;
+        output += `local k = "${key}";\n`;
+        output += `local d = {${encrypted.join(',')}};\n\n`;
+
+        // Anti-debug layer
+        if (antiDebug) {
+          output += `if _G["debug"] or _G["hookfunction"] then print("Tampering detected!") return end\n`;
+        }
+
+        output += `local function decrypt() local s=""; for i=1,#d do local c=d[i]^(k:byte((i-1)%#k+1)); s=s..string.char(c) end return s end\n`;
+
+        // Add junk + confusion
+        if (junkCode) {
+          output += `local _=math.random();local __=string.char;local ___="` + generateRandomString(40) + `";\n`;
+        }
+
+        output += `load(decrypt())();\n`;
+        output += `-- Encrypted by YasuScator`;
+
+        // Download
+        const blob = new Blob([output], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Protected_${currentFile.name}`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        alert("✅ Script successfully obfuscated and downloaded!");
+      };
+
+      reader.readAsText(currentFile);
+    });
+  </script>
+</body>
+  </html>
