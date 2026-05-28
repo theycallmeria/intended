@@ -188,7 +188,7 @@
 
       const reader = new FileReader();
       reader.onload = () => {
-        const script = reader.result.trim();
+        let script = reader.result.trim();
         let output = `--[[ ZukiScator v0.0.3 ]]--\n`;
         output += `--[[ https://zukisworld.vercel.app/# ]]--\n\n`;
 
@@ -196,6 +196,8 @@
           const encrypted = xorEncrypt(script, key);
           output += `local k = "${key}";\n`;
           output += `local d = {${encrypted.join(',')}};\n\n`;
+        } else {
+          output += `-- No encryption key - Basic Obfuscation Mode\n\n`;
         }
 
         // Anti-Tampering
@@ -206,30 +208,23 @@
           output += `end\n\n`;
         }
 
-        // Decrypt function (only if encrypted)
+        // Decrypt function only if encrypted
         if (useEncryption) {
-          output += `local function decrypt()\n`;
-          output += `  local s = ""\n`;
-          output += `  for i = 1, #d do\n`;
-          output += `    local c = d[i] \~ k:byte((i-1) % #k + 1)\n`;
-          output += `    s = s .. string.char(c)\n`;
-          output += `  end\n`;
-          output += `  return s\n`;
-          output += `end\n\n`;
+          output += `local function decrypt()\n  local s = ""\n  for i = 1, #d do\n    local c = d[i] \~ k:byte((i-1) % #k + 1)\n    s = s .. string.char(c)\n  end\n  return s\nend\n\n`;
         }
 
-        // Junk Code
+        // Junk Code (works with or without key)
         if (document.getElementById('junk-code').checked) {
           output += `local _ = math.random(1,999999);\n`;
           output += `local __ = string.char;\n`;
-          output += `local ___ = "${generateRandomString(45)}";\n\n`;
+          output += `local ___ = "${generateRandomString(50)}";\n\n`;
         }
 
-        // Execute
+        // Final Execution
         if (useEncryption) {
           output += `loadstring(decrypt())()\n`;
         } else {
-          output += `-- No encryption key used\n`;
+          // Basic obfuscation without encryption
           output += `loadstring([[\n${script}\n]])()\n`;
         }
 
@@ -251,4 +246,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
